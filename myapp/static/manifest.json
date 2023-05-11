@@ -1,0 +1,35 @@
+{
+    "name": "Outlay",
+    "short_name": "Outlay",
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff",
+    "icons": [
+      {   
+        "src": "/myapp/static/logo.jpg",
+        "sizes": "48x48",
+        "type": "image/png"
+      },  
+      {   
+        "src": "/myapp/static/logo.jpg",
+        "sizes": "72x72",
+        "type": "image/png"
+      },  
+      {   
+        "src": "/myapp/static/logo.jpg",
+        "sizes": "96x96",
+        "type": "image/png"
+      },  
+      {   
+        "src": "/myapp/static/logo.jpg",
+        "sizes": "144x144",
+        "type": "image/png"                                                                                                                                                                                      
+      },  
+      {   
+        "src": "/myapp/static/logo.jpg",
+        "sizes": "192x192",
+        "type": "image/png"
+      }   
+    ]   
+  }

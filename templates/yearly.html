@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Yearly{% endblock %}
+
+
+{% block content %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+ <!-- index.html -->
+ <!-- index.html -->
+<br>
+<br>
+<br>
+<br>
+<br>
+<canvas id="mychart" ></canvas>
+<script>
+
+  drawBarGraph(document.getElementById('mychart'))
+  function drawBarGraph(id) {
+    var labels = {{labels|safe}};
+    console.log(labels);
+    var chartLabel = {{labels|safe}};
+    var chartdata = {{label_data|safe}};
+    var ctx = id.getContext('2d');
+    var ict_unit = [];
+    var efficiency = [];
+    var coloR = [];
+    var dynamicColors = function() {
+      var r = Math.floor(Math.random() * 255);
+      var g = Math.floor(Math.random() * 255);
+      var b = Math.floor(Math.random() * 255);
+      return "rgba(" + r + "," + g + "," + b + "0.4 )";
+   };
+
+   for (var i in chartdata) {
+      ict_unit.push("ICT Unit " + chartdata[i].ict_unit);
+      efficiency.push(chartdata[i].efficiency);
+      coloR.push(dynamicColors());
+   }
+    var myChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: chartLabel,
+          data: chartdata,
+          backgroundColor : coloR,
+          borderColor: 'rgba(200, 200, 200, 0.75)',
+          hoverBorderColor: 'rgba(200, 200, 200, 0.2)',
+          borderWidth: 1
+        }]
+      }
+    });
+  }
+</script>
+
+ {% endblock %}

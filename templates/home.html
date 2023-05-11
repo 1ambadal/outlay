@@ -1,0 +1,139 @@
+<!-- templates/home.html-->
+{% extends 'base.html' %}
+
+{% block title %}Outlay{% endblock %}
+{% load static %}
+
+{% block content %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+<br>
+<br>
+{% if user.is_authenticated %}
+ <canvas id="myChartBar"></canvas>
+<script>  
+  $(document).ready(function() {
+      $.ajax({
+          url: '/chart/',
+          type: 'GET',
+          dataType: 'json',
+          success: function(data) {
+            drawBarGraph(data, 'myChartBar');
+          }
+      });
+  });
+  function drawBarGraph(data, id) {
+    var labels = data.labels;
+    var chartLabel = data.labels;
+    var chartdata = data.data;
+    var charttotal = data.total;
+    document.getElementById('output').innerHTML = "Total spent " + charttotal+"₹";
+    var ctx = document.getElementById(id).getContext('2d');
+    var ict_unit = [];
+    var efficiency = [];
+    var coloR = [];
+    var dynamicColors = function() {
+      var r = Math.floor(Math.random() * 255);
+      var g = Math.floor(Math.random() * 255);
+      var b = Math.floor(Math.random() * 255);
+      return "rgba(" + r + "," + g + "," + b + "0.4 )";
+   };
+
+   for (var i in chartdata) {
+      ict_unit.push("ICT Unit " + chartdata[i].ict_unit);
+      efficiency.push(chartdata[i].efficiency);
+      coloR.push(dynamicColors());
+   }
+    var myChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: chartLabel,
+          data: chartdata,
+          backgroundColor : coloR,
+          {% comment %} borderColor: 'rgba(200, 200, 200, 0.75)', {% endcomment %}
+          borderColor: '343A40',
+          hoverBorderColor: 'rgba(200, 200, 200, 0.2)',
+          borderWidth: 1
+        }]
+      }
+    });
+  }
+
+  function deleteid(id){
+    $.ajax({
+      url: '/view_more/delete/',
+      data: {
+        'id':id,
+      },
+      dataType: 'json',
+      success: function(data) {
+        console.log(data);  
+      }
+    });
+  }
+</script>
+<br>
+<div class="container text-center">
+  <p id="output" style="font-size: 20px; color: #333; font-weight: bold;"></p>
+</div>
+
+  <br>
+  <br>
+  <form class="text-center" method = "POST" action="{% url 'add' %}">
+    {% csrf_token %}
+    Expense: <input type="text" pattern="[a-zA-Z]+\s\d+" name="expense" style="height: 42px;" required oninvalid="this.setCustomValidity('Please enter a word followed by a space and an amount')" oninput="this.setCustomValidity('')"/>
+    <input type="hidden" name='user' value="{{user.username}}">
+    <input class ="btn btn-primary" type="submit" value= "+" style="font-size: 20px; background-color: #343A40; border-color: #343A40;" required/>
+    <br/>
+  </form>
+  <br>
+  <br>
+  {% if comp_data %}
+  <div class="container" >
+    <h2 class="text-center"><u>Details</u></h2><br>            
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for i in comp_data %}
+        <tr>
+          <td>{{i.name | title }}</td>
+          <td>{{i.price}}</td>
+          <td>{{i.current_date|date:"d M"}}</td>
+          <td><a href="delete/?id={{i.id}}" style="color: red;">&times;</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <div class="text-center" class="container">
+      <a href="/" style="color: #343A40;">Hide</a>
+    </div>
+  </div>
+
+  {%else%}
+  <div class="text-center" class="container">
+    <a href="view_more" style="color: #343A40;"><u>View Details</u></a>
+  </div>
+  {% endif %}
+
+{% else %}
+<div class="text-center" class="container">
+  <br><br>
+  <img src="{% static 'logo.jpg'%}" alt="Italian Trulli">
+  <br><br>
+
+  <a class ="btn btn-primary" href="{% url 'login' %}" style="font-size: 20px; background-color: #343A40; border-color: #343A40;">Log In</a>&nbsp;
+  <a class ="btn btn-primary" href="{% url 'signup' %}" style="font-size: 20px; background-color: #343A40; border-color: #343A40;">Sign Up</a>
+</div>
+{% endif %}
+{% endblock %}
