@@ -42,10 +42,11 @@ def add(request):
     user = request.user
     if request.method == "POST":
             expense = request.POST['expense']
+            category = request.POST['category']
 
             name,price = expense.strip().split(' ')
 
-            product = Product(name=name, price=price, user=user)
+            product = Product(category=category, name=name, price=price, user=user)
             product.save()
            
             return redirect ('home')
@@ -61,17 +62,17 @@ def chart(request):
     final_dict = {}
     unset = set()
     for product in queryset:
-        name = product.get('name')
+        category = product.get('category').title()
         price = product.get('price')
-        if name in unset:
+        if category in unset:
             temp = {
-                name: int(final_dict.get(name) + price)
+                category: int(final_dict.get(category) + price)
             }
         else:
             temp ={
-                name: int(price)
+                category: int(price)
             }
-            unset.add(name) 
+            unset.add(category) 
         final_dict.update(temp)
 
     labels = list(final_dict.keys())
@@ -117,7 +118,7 @@ def yearly(request):
 def view_more(request):
     month = datetime.date.today().month
 
-    queryset = Product.objects.filter(user = request.user,current_date__month = month).values('name','price','current_date','id')
+    queryset = Product.objects.filter(user = request.user,current_date__month = month).values('category','name','price','current_date','id').order_by("-id")
 
     return render(request,'home.html',{'comp_data':queryset})
 

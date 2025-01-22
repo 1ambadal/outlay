@@ -28,23 +28,24 @@
     var chartLabel = data.labels;
     var chartdata = data.data;
     var charttotal = data.total;
-    document.getElementById('output').innerHTML = "Total spent " + charttotal+"₹";
+    if (charttotal > 0){  
+      document.getElementById('output').innerHTML = charttotal+"₹";
+    } else{
+      document.getElementById('output').remove();
+      document.getElementById('view_details').remove();
+    }
     var ctx = document.getElementById(id).getContext('2d');
-    var ict_unit = [];
-    var efficiency = [];
     var coloR = [];
-    var dynamicColors = function() {
-      var r = Math.floor(Math.random() * 255);
-      var g = Math.floor(Math.random() * 255);
-      var b = Math.floor(Math.random() * 255);
-      return "rgba(" + r + "," + g + "," + b + "0.4 )";
-   };
-
-   for (var i in chartdata) {
-      ict_unit.push("ICT Unit " + chartdata[i].ict_unit);
-      efficiency.push(chartdata[i].efficiency);
-      coloR.push(dynamicColors());
-   }
+    coloR = [   
+          '#d53e4f',
+          '#f46d43',
+          '#fdae61',
+          '#fee08b',
+          '#e6f598',
+          '#abdda4',
+          '#66c2a5',
+          '#3288bd',
+          ] 
     var myChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -53,15 +54,35 @@
           label: chartLabel,
           data: chartdata,
           backgroundColor : coloR,
-          {% comment %} borderColor: 'rgba(200, 200, 200, 0.75)', {% endcomment %}
-          borderColor: '343A40',
+          borderColor: '#1f1f1f',
           hoverBorderColor: 'rgba(200, 200, 200, 0.2)',
-          borderWidth: 1
+          borderWidth: 5,
+          borderAlign: 'center'
         }]
       }
     });
   }
+  function validateForm() {
+    const categories = document.getElementsByName('category');
+    let isCategorySelected = false;
 
+    // Check if any radio button is selected
+    for (let i = 0; i < categories.length; i++) {
+      if (categories[i].checked) {
+        isCategorySelected = true;
+        break;
+      }
+    }
+
+    // Show error message if no category is selected
+    if (!isCategorySelected) {
+      const errorMessage = document.getElementById('error-message');
+      errorMessage.style.display = 'block';
+      return false; // Prevent form submission
+    }
+
+    return true; // Allow form submission
+  }
   function deleteid(id){
     $.ajax({
       url: '/view_more/delete/',
@@ -75,26 +96,90 @@
     });
   }
 </script>
+<style>
+  .btn-check {
+    display: none; /* Hide the default radio button */
+  }
+
+  .btn {
+    display: inline-block;
+    height: 35px; /* Match the text field height */
+    width: 120px; /* Adjust width to be responsive */
+    line-height: 35px; /* Center text vertically */
+    padding: 0 1px; /* Adjust padding for consistent spacing */
+    margin: 1px 0; /* Add vertical spacing between buttons */
+    background-color: #5F6368; /* Default background color */
+    color: #0f0f0f;
+    border: 2px solid #5F6368;
+    border-radius: 50px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+  }
+
+  .btn:hover {
+    background-color: #e0e0e0; /* Hover effect */
+  }
+
+  .btn-check:checked + .btn {
+    background-color: #343A40; /* Background color when selected */
+    color: #fff; /* Text color when selected */
+    border-color: #343A40;
+  }
+  .table {
+    border-radius: 10px; /* Adjust the value for desired roundness */
+    overflow: hidden; /* Ensures the radius applies to table content */
+  }
+</style>
+
 <br>
 <div class="container text-center">
-  <p id="output" style="font-size: 20px; color: #333; font-weight: bold;"></p>
+  <p id="output" style="font-size: 20px; width: 200px; color: #E3E6E0; font-weight: bold; border: 2px solid #E3E6E0; padding: 10px; border-radius: 50px; margin: auto;"></p>  
 </div>
 
   <br>
   <br>
-  <form class="text-center" method = "POST" action="{% url 'add' %}">
+  <form class="text-center" method="POST" action="{% url 'add' %}">
     {% csrf_token %}
-    Expense: <input type="text" pattern="[a-zA-Z]+\s\d+" name="expense" style="height: 42px;" required oninvalid="this.setCustomValidity('Please enter a word followed by a space and an amount')" oninput="this.setCustomValidity('')"/>
-    <input type="hidden" name='user' value="{{user.username}}">
-    <input class ="btn btn-primary" type="submit" value= "+" style="font-size: 20px; background-color: #343A40; border-color: #343A40;" required/>
+    <input type="text" pattern="[a-zA-Z]+\s\d+" name="expense" style="height: 45px; width: 250px; background-color: #E3E6E0; border: solid #E3E6E0; border-radius: 50px; margin: 5px;" required oninvalid="this.setCustomValidity('Please enter a word followed by a space and an amount')" oninput="this.setCustomValidity('')" placeholder="&nbsp;&nbsp;&nbsp;Add Expense..."/>
+    <input type="hidden" name="user" value="{{ user.username }}">
+    
+    <div>
+        <input type="radio" class="btn-check" name="category" id="travel" value="travel" required>
+        <label class="btn" for="travel">Travel</label>
+        <input type="radio" class="btn-check" name="category" id="grocery" value="grocery" required>
+        <label class="btn" for="grocery">Grocery</label>
+    </div>
+    <div>
+        <input type="radio" class="btn-check" name="category" id="shopping" value="shopping" required>
+        <label class="btn" for="shopping">Shopping</label>
+        <input type="radio" class="btn-check" name="category" id="dineout" value="dineout" required>
+        <label class="btn" for="dineout">Dineout</label>
+    </div>
+    <div>
+      <input type="radio" class="btn-check" name="category" id="emergency" value="emergency" required>
+      <label class="btn" for="emergency">Emergency</label>
+      <input type="radio" class="btn-check" name="category" id="entertainment" value="entertainment" required>
+      <label class="btn" for="entertainment">Entertainment</label>
+    </div>
+    <div>
+      <input type="radio" class="btn-check" name="category" id="office" value="office" required>
+      <label class="btn" for="office">Office</label>
+      <input type="radio" class="btn-check" name="category" id="other" value="other" required>
+      <label class="btn" for="other">Other</label>
+    </div>
+    <input class="btn btn-primary" type="submit" value="Add" style="font-size: 20px; width:250px; background-color: #343A40; border-color: #343A40; margin: 5px;" required onclick="validateForm()"/>
     <br/>
-  </form>
+    <p id="error-message" style="color: red; font-size: 16px; display: none;">Please select expense category.</p>
+</form>
+
   <br>
   <br>
   {% if comp_data %}
-  <div class="container" >
-    <h2 class="text-center"><u>Details</u></h2><br>            
-    <table class="table table-striped">
+  <div class="container">
+    <h2 class="text-center" style="font-size: 20px; width: 200px; color: #E3E6E0; font-weight: bold; border: 2px solid #E3E6E0; padding: 10px; border-radius: 50px; margin: auto;">Expenses</h2><br>            
+    <table class="table table-striped table-dark">
       <thead>
         <tr>
           <th>Description</th>
@@ -107,7 +192,7 @@
 
         {% for i in comp_data %}
         <tr>
-          <td>{{i.name | title }}</td>
+          <td>{{i.name | title }} ({{i.category | title }})</td>
           <td>{{i.price}}</td>
           <td>{{i.current_date|date:"d M"}}</td>
           <td><a href="delete/?id={{i.id}}" style="color: red;">&times;</a></td>
@@ -116,13 +201,13 @@
       </tbody>
     </table>
     <div class="text-center" class="container">
-      <a href="/" style="color: #343A40;">Hide</a>
+      <a href="/"  style="font-size: 20px; width: 200px; color: #E3E6E0; font-weight: bold; margin: auto;">Hide</a>
     </div>
   </div>
 
   {%else%}
-  <div class="text-center" class="container">
-    <a href="view_more" style="color: #343A40;"><u>View Details</u></a>
+  <div class="text-center" id="view_details" class="container" >
+    <a href="view_more"  style="font-size: 20px; width: 200px; color: #E3E6E0; font-weight: bold; margin: auto;"><u>View Expenses</u></a>
   </div>
   {% endif %}
 
